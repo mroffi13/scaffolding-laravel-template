@@ -4,6 +4,9 @@ return [
     'menu' => [
         [
             'header' => 'Dashboard',
+            'permission' => [
+                'dashboard-menu'
+            ],
         ],
         [
             'text' => 'Dashboard',
@@ -13,7 +16,7 @@ return [
                 'dashboard'
             ],
             'permission' => [
-                'dashboard'
+                'dashboard-menu'
             ],
             // 'sub_menu' => [
             //     [
