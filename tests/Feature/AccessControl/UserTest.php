@@ -368,4 +368,44 @@ class UserTest extends TestCase
         ]);
         $response->assertStatus(302);
     }
+
+    public function test_view_user_is_displayed(): void
+    {
+        $user = User::factory()->create();
+        $role = Role::create([
+            'name' => 'superadmin',
+            'display_name' => 'Superadmin',
+        ]);
+        $permission = Permission::create([
+            'name' => 'users-read',
+            'display_name' => 'users-read',
+        ]);
+        $role->permissions()->attach($permission);
+        $user->roles()->attach($role);
+
+        $response = $this->actingAs($user)->get('/users/' . $user->id);
+        $response->assertOk();
+    }
+
+    public function test_assign_user_role_permissions_is_success(): void
+    {
+        $user = User::factory()->create();
+        $role = Role::create([
+            'name' => 'superadmin',
+            'display_name' => 'Superadmin',
+        ]);
+        $permission = Permission::create([
+            'name' => 'users-update',
+            'display_name' => 'users-update',
+        ]);
+        $role->permissions()->attach($permission);
+        $user->roles()->attach($role);
+
+        $response = $this->actingAs($user)->patch('/users/' . $user->id . '/assign-acl', [
+            'permission' => $permission->id,
+            'role' => $role->id
+        ]);
+        // dd($response);
+        $response->assertSessionHasErrors(['permission', 'role'])->assertStatus(302)->assertRedirect();
+    }
 }
