@@ -4,9 +4,12 @@ namespace App\Http\Controllers\AccessControl;
 
 use App\Helpers\General;
 use App\Http\Controllers\Controller;
+use App\Models\AccessControl\Permission;
+use App\Models\AccessControl\Role;
 use App\Models\AccessControl\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 use Yajra\DataTables\Facades\DataTables;
 
 class UserController extends Controller
@@ -62,7 +65,17 @@ class UserController extends Controller
      */
     public function show(string $id)
     {
-        //
+        General::checkPermission('users-read');
+        $userLogin = Auth::user();
+        $user = User::with(['roles.permissions', 'permissions'])->find($id);
+        if($user == null) {
+            abort(404, 'User not found');
+        }
+
+        $roles = Role::all();
+        $permissions = Permission::orderBy('name', 'asc')->get();
+
+        return view('access-control.users.view', compact('user', 'userLogin', 'roles', 'permissions'));
     }
 
     /**
@@ -70,7 +83,14 @@ class UserController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        General::checkPermission('users-update');
+
+        $user = User::find($id);
+        if($user == null) {
+            abort(404, 'User not found');
+        }
+
+        return view('access-control.users.create-or-edit', compact('user'));
     }
 
     /**
@@ -78,7 +98,31 @@ class UserController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        General::checkPermission('users-update');
+
+        $request->validate([
+            'name' => 'required',
+            'email' => [ 'required', 'email', Rule::unique('users')->ignore($id) ],
+        ]);
+
+        $user = User::where('id', $id)->first();
+        if($user == null) {
+            abort(404, 'User not found');
+        }
+
+        $user->name = $request->name;
+        $user->email = $request->email;
+        if(!empty($request->password)) {
+            $user->password = bcrypt($request->password);
+        }
+        $user->active = $request->active ?? 0;
+        $user->save();
+
+        return redirect()->route('users')->with([
+            'success' => true,
+            'toastr' => 'success',
+            'message' => 'User updated successfully',
+        ]);
     }
 
     /**
@@ -131,5 +175,32 @@ class UserController extends Controller
                 }
             })
             ->toJson();
+    }
+
+    public function assignAcl(Request $request, string $id)
+    {
+        General::checkPermission('users-update');
+
+        $permission_validasi = ['array'];
+        if(!empty($request->permission))
+            $permission_validasi[] = 'exists:permissions,id';
+
+        $request->validate([
+            'role' => ['required', 'array', 'exists:roles,id'],
+            'permission' => $permission_validasi,
+        ]);
+
+        $user = User::where('id', $id)->first();
+        if($user == null) {
+            abort(404, 'User not found');
+        }
+        $user->syncRoles($request->role);
+        $user->syncPermissions($request->permission);
+
+        return redirect()->route('users.show', $id)->with([
+            'success' => true,
+            'toastr' => 'success',
+            'message' => 'Role / Permission assigned successfully',
+        ]);
     }
 }

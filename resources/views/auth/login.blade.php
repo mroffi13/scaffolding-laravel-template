@@ -1,6 +1,5 @@
 <x-guest-layout>
     <!-- Session Status -->
-    <x-auth-session-status class="mb-4" :status="session('status')" />
     <div class="m-3 p-4">
         <img src="{{ asset('img/stisla-fill.svg') }}" alt="logo" width="80"
             class="shadow-light rounded-circle mb-5 mt-2">

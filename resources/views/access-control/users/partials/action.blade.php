@@ -6,10 +6,10 @@
         </button>
         <div class="dropdown-menu" style="">
             @if ($user->isAbleTo('users-read'))
-                <a class="dropdown-item" href="#"><i class="fas fa-eye"></i> View</a>
+                <a class="dropdown-item" href="{{ route('users.show', $model->id) }}"><i class="fas fa-eye"></i> View</a>
             @endif
             @if ($user->isAbleTo('users-update'))
-                <a class="dropdown-item" href="#"><i class="fas fa-edit"></i> Edit</a>
+                <a class="dropdown-item" href="{{ route('users.edit', $model->id) }}"><i class="fas fa-edit"></i> Edit</a>
             @endif
             @if ($user->isAbleTo('users-update'))
                 <a class="dropdown-item" href="#" data-toggle="tooltip" title="Delete"

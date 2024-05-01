@@ -29,6 +29,7 @@ Route::middleware('auth')->group(function () {
      * Route Access Control
      */
     // Route User
+    Route::patch('/users/{user}/assign-acl', [UserController::class, 'assignAcl'])->name('users.assign-acl');
     Route::post('/users/get-data', [UserController::class, 'getData'])->name('users.get-data');
     Route::resource('users', UserController::class)->names([
         'index' => 'users',

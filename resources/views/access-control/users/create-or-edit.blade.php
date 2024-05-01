@@ -90,7 +90,7 @@
                                     <label class="col-form-label text-md-right col-12 col-md-3 col-lg-3">Status</label>
                                     <div class="col-sm-12 col-md-7">
                                         <label class="custom-switch mt-2">
-                                            <input type="checkbox" name="custom-switch-checkbox"
+                                            <input type="checkbox" name="active"
                                                 {{ old('custom-switch-checkbox', $user?->getAttributes()['active'] ?? 0) == 1 ? 'checked' : '' }}
                                                 value="1" class="custom-switch-input">
                                             <span class="custom-switch-indicator"></span>
@@ -102,6 +102,7 @@
                         </div>
                         <div class="card-footer">
                             <button type="submit" class="btn btn-primary note-btn">Submit</button>
+                            <a href="{{ route('users') }}" class="btn btn-secondary">Cancel</a>
                         </div>
                     </div>
                 </form>

@@ -46,7 +46,7 @@ return [
             'text' => 'Users',
             'route' => 'users',
             'icon' => 'fas fa-users',
-            'active' => ['users', 'users/{id}', 'users/create', 'users/{id}/edit',],
+            'active' => ['users', 'users/{user}', 'users/create', 'users/{user}/edit',],
             'permission' => [
                 'users-menu'
             ],
