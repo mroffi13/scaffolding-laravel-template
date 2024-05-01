@@ -4,6 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no" name="viewport">
+    <!-- CSRF Token -->
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title') &mdash; Stisla</title>
 
     <!-- General CSS Files -->
@@ -12,8 +14,11 @@
         integrity="sha512-KfkfwYDsLkIlwQp6LFnl8zNdLGxu9YAA1QvwINks4PhcElQSvqcyVLLD9aMhXd13uQjoXtEKNosOWaZqXgel0g=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />
 
+    <link rel="stylesheet" href="{{ asset('library/izitoast/dist/css/iziToast.min.css') }}">
+
     @stack('style')
 
+    <link rel="stylesheet" href="{{ asset('css/custom.css') }}">
     <!-- Template CSS -->
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
     <link rel="stylesheet" href="{{ asset('css/components.css') }}">
@@ -38,6 +43,7 @@
     <div id="app">
         <div class="main-wrapper">
             <!-- Header -->
+            <x-app-session-status :success="session('success') ?? false" :message="session('message')" :toastr="session('toastr')" />
             @include('components.header')
 
             <!-- Sidebar -->
@@ -60,11 +66,20 @@
     <script src="{{ asset('library/moment/min/moment.min.js') }}"></script>
     <script src="{{ asset('js/stisla.js') }}"></script>
 
+    <script src="{{ asset('library/izitoast/dist/js/iziToast.min.js') }}"></script>
+    <script>
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
+        });
+    </script>
+
     @stack('scripts')
 
     <!-- Template JS File -->
     <script src="{{ asset('js/scripts.js') }}"></script>
-    <script src="{{ asset('js/custom.js') }}"></script>
+    @vite(['resources/js/custom.js'])
 </body>
 
 </html>

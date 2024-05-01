@@ -46,7 +46,7 @@
             </div>
         </form>
 
-        <div class="text-small mt-5 text-center">
+        <div class="text-small mt-5 mb-5 text-center">
             Copyright &copy; {{ config('app.name') }}. Made with 💙 by Stisla
             <div class="mt-2">
                 <a href="#">Privacy Policy</a>

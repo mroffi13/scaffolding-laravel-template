@@ -35,5 +35,21 @@ return [
             //     ],
             // ]
         ],
+        [
+            'header' => 'Access Control',
+            'permission' => [
+                'acl-menu',
+                'users-menu'
+            ],
+        ],
+        [
+            'text' => 'Users',
+            'route' => 'users',
+            'icon' => 'fas fa-users',
+            'active' => ['users', 'users/{id}', 'users/create', 'users/{id}/edit',],
+            'permission' => [
+                'users-menu'
+            ],
+        ],
     ],
 ];

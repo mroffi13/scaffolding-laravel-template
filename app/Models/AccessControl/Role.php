@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\AccessControl;
 
 use Laratrust\Models\Role as RoleModel;
 

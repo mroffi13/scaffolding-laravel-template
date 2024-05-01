@@ -2,7 +2,15 @@
  *
  * You can write your CSS code here, DO NOT touch the default JavaScript file
  * because it will make it harder for you to update.
- * 
+ *
  */
+
+ #dataList_wrapper .row:first-child {
+   margin-bottom: 1rem !important;
+ }
+
+ #dataList_wrapper .row:last-child {
+   margin-top: 1rem !important;
+ }
 
 /*# sourceMappingURL=custom.css.map */
