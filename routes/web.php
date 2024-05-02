@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AccessControl\PermissionController;
 use App\Http\Controllers\AccessControl\UserController;
 use App\Http\Controllers\ProfileController;
 use App\Models\AccessControl\User;
@@ -29,6 +30,15 @@ Route::middleware('auth')->group(function () {
      * Route Access Control
      */
     // Route User
+    Route::post('/permissions/get-data', [PermissionController::class, 'getData'])->name('permissions.get-data');
+    Route::resource('permissions', PermissionController::class)->names([
+        'index' => 'permissions',
+        'create' => 'permissions.create',
+        'store' => 'permissions.store',
+        'edit' => 'permissions.edit',
+        'update' => 'permissions.update',
+    ]);
+
     Route::patch('/users/{user}/assign-acl', [UserController::class, 'assignAcl'])->name('users.assign-acl');
     Route::post('/users/get-data', [UserController::class, 'getData'])->name('users.get-data');
     Route::resource('users', UserController::class)->names([

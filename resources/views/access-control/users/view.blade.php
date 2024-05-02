@@ -13,7 +13,7 @@
                 <h1>Users</h1>
                 <div class="section-header-breadcrumb">
                     <div class="breadcrumb-item active"><a href="{{ route('dashboard') }}">Dashboard</a></div>
-                    <div class="breadcrumb-item active"><a href="{{ route('dashboard') }}">Users</a></div>
+                    <div class="breadcrumb-item active"><a href="{{ route('users') }}">Users</a></div>
                     <div class="breadcrumb-item">
                         @if (!empty($user))
                             View User #{{ $user->id }}

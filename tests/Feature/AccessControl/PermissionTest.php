@@ -9,13 +9,13 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 
-class UserTest extends TestCase
+class PermissionTest extends TestCase
 {
     use RefreshDatabase;
     /**
      * A basic feature test example.
      */
-    public function test_user_list_page_is_displayed(): void
+    public function test_permission_list_page_is_displayed(): void
     {
         $user = User::factory()->create();
         $role = Role::create([
@@ -23,18 +23,18 @@ class UserTest extends TestCase
             'display_name' => 'Superadmin',
         ]);
         $permission = Permission::create([
-            'name' => 'users-read',
-            'display_name' => 'users-read',
+            'name' => 'acl-read',
+            'display_name' => 'acl-read',
         ]);
         $role->permissions()->attach($permission);
         $user->roles()->attach($role);
 
-        $response = $this->actingAs($user)->get('/users');
+        $response = $this->actingAs($user)->get('/permissions');
 
         $response->assertOk();
     }
 
-    public function test_user_list_page_is_forbidden(): void
+    public function test_permission_list_page_is_forbidden(): void
     {
         $user = User::factory()->create();
         $role = Role::create([
@@ -42,20 +42,20 @@ class UserTest extends TestCase
             'display_name' => 'Superadmin',
         ]);
         $permission = Permission::create([
-            'name' => 'users-reads',
-            'display_name' => 'users-reads',
+            'name' => 'acl-wrong-reads',
+            'display_name' => 'acl-wrong-reads',
         ]);
         $role->permissions()->attach($permission);
         $user->roles()->attach($role);
 
-        $response = $this->actingAs($user)->get('/users');
+        $response = $this->actingAs($user)->get('/permissions');
         $response->assertForbidden();
     }
 
     /**
      * A basic feature test example.
      */
-    public function test_get_user_list_is_success(): void
+    public function test_get_permissions_list_is_success(): void
     {
         $user = User::factory()->create();
         $role = Role::create([
@@ -63,17 +63,17 @@ class UserTest extends TestCase
             'display_name' => 'Superadmin',
         ]);
         $permission = Permission::create([
-            'name' => 'users-read',
-            'display_name' => 'users-read',
+            'name' => 'acl-read',
+            'display_name' => 'acl-read',
         ]);
         $role->permissions()->attach($permission);
         $user->roles()->attach($role);
 
-        $response = $this->actingAs($user)->post('/users/get-data');
+        $response = $this->actingAs($user)->post('/permissions/get-data');
         $response->assertOk();
     }
 
-    public function test_get_user_list_is_forbidden(): void
+    public function test_get_permissions_list_is_forbidden(): void
     {
         $user = User::factory()->create();
         $role = Role::create([
@@ -81,17 +81,17 @@ class UserTest extends TestCase
             'display_name' => 'Superadmin',
         ]);
         $permission = Permission::create([
-            'name' => 'users-reads',
-            'display_name' => 'users-reads',
+            'name' => 'acl-wrong-reads',
+            'display_name' => 'acl-wrong-reads',
         ]);
         $role->permissions()->attach($permission);
         $user->roles()->attach($role);
 
-        $response = $this->actingAs($user)->post('/users/get-data');
+        $response = $this->actingAs($user)->post('/permissions/get-data');
         $response->assertForbidden();
     }
 
-    public function test_delete_user_is_forbidden(): void
+    public function test_delete_permission_is_forbidden(): void
     {
         $user = User::factory()->create();
         $role = Role::create([
@@ -99,19 +99,19 @@ class UserTest extends TestCase
             'display_name' => 'Superadmin',
         ]);
         $permission = Permission::create([
-            'name' => 'users-isnt-delete',
-            'display_name' => 'users-isnt-delete',
+            'name' => 'acl-isnt-delete',
+            'display_name' => 'acl-isnt-delete',
         ]);
         $role->permissions()->attach($permission);
         $user->roles()->attach($role);
 
         $userDelete = User::factory()->create();
 
-        $response = $this->actingAs($user)->delete('/users/' . $userDelete->id);
+        $response = $this->actingAs($user)->delete('/permissions/' . $userDelete->id);
         $response->assertForbidden();
     }
 
-    public function test_delete_user_is_success(): void
+    public function test_delete_permission_is_success(): void
     {
         $user = User::factory()->create();
         $role = Role::create([
@@ -119,22 +119,25 @@ class UserTest extends TestCase
             'display_name' => 'Superadmin',
         ]);
         $permission = Permission::create([
-            'name' => 'users-delete',
-            'display_name' => 'users-delete',
+            'name' => 'acl-delete',
+            'display_name' => 'acl-delete',
         ]);
         $role->permissions()->attach($permission);
         $user->roles()->attach($role);
 
-        $userDelete = User::factory()->create();
+        $permDelete = Permission::create([
+            'name' => 'acl-test-delete',
+            'display_name' => 'acl-test-delete',
+        ]);
 
-        $response = $this->actingAs($user)->delete('/users/' . $userDelete->id);
+        $response = $this->actingAs($user)->delete('/permissions/' . $permDelete->id);
         $response->assertJson([
             'success' => true,
-            'message' => 'User deleted successfully',
+            'message' => 'Permission deleted successfully',
         ], true);
     }
 
-    public function test_delete_user_is_not_found(): void
+    public function test_delete_permission_is_not_found(): void
     {
         $user = User::factory()->create();
         $role = Role::create([
@@ -142,17 +145,17 @@ class UserTest extends TestCase
             'display_name' => 'Superadmin',
         ]);
         $permission = Permission::create([
-            'name' => 'users-delete',
-            'display_name' => 'users-delete',
+            'name' => 'acl-delete',
+            'display_name' => 'acl-delete',
         ]);
         $role->permissions()->attach($permission);
         $user->roles()->attach($role);
 
-        $response = $this->actingAs($user)->delete('/users/2');
+        $response = $this->actingAs($user)->delete('/permissions/22222');
         $response->assertNotFound();
     }
 
-    public function test_create_user_page_is_displayed(): void
+    public function test_create_permission_page_is_displayed(): void
     {
         $user = User::factory()->create();
         $role = Role::create([
@@ -160,17 +163,17 @@ class UserTest extends TestCase
             'display_name' => 'Superadmin',
         ]);
         $permission = Permission::create([
-            'name' => 'users-create',
-            'display_name' => 'users-create',
+            'name' => 'acl-create',
+            'display_name' => 'acl-create',
         ]);
         $role->permissions()->attach($permission);
         $user->roles()->attach($role);
 
-        $response = $this->actingAs($user)->get('/users/create');
+        $response = $this->actingAs($user)->get('/permissions/create');
         $response->assertOk();
     }
 
-    public function test_create_user_is_forbidden(): void
+    public function test_create_permission_is_forbidden(): void
     {
         $user = User::factory()->create();
         $role = Role::create([
@@ -178,17 +181,17 @@ class UserTest extends TestCase
             'display_name' => 'Superadmin',
         ]);
         $permission = Permission::create([
-            'name' => 'users-wrong-create',
-            'display_name' => 'users-wrong-create',
+            'name' => 'acl-wrong-create',
+            'display_name' => 'acl-wrong-create',
         ]);
         $role->permissions()->attach($permission);
         $user->roles()->attach($role);
 
-        $response = $this->actingAs($user)->get('/users/create');
+        $response = $this->actingAs($user)->get('/permissions/create');
         $response->assertForbidden();
     }
 
-    public function test_create_user_is_error_validation(): void
+    public function test_create_permission_is_error_validation(): void
     {
         $user = User::factory()->create();
         $role = Role::create([
@@ -196,21 +199,20 @@ class UserTest extends TestCase
             'display_name' => 'Superadmin',
         ]);
         $permission = Permission::create([
-            'name' => 'users-create',
-            'display_name' => 'users-create',
+            'name' => 'acl-create',
+            'display_name' => 'acl-create',
         ]);
         $role->permissions()->attach($permission);
         $user->roles()->attach($role);
 
-        $response = $this->actingAs($user)->post('/users', [
-            'name' => '',
-            'email' => '',
-            'password' => '',
+        $response = $this->actingAs($user)->post('/permissions', [
+            'permission' => 'creates',
+            'module' => '',
         ]);
-        $response->assertSessionHasErrors(['name', 'email', 'password'])->assertStatus(302);
+        $response->assertSessionHasErrors(['permission', 'module'])->assertStatus(302);
     }
 
-    public function test_create_user_is_exists(): void
+    public function test_create_permission_is_exists(): void
     {
         $user = User::factory()->create();
         $role = Role::create([
@@ -218,23 +220,29 @@ class UserTest extends TestCase
             'display_name' => 'Superadmin',
         ]);
         $permission = Permission::create([
-            'name' => 'users-create',
-            'display_name' => 'users-create',
+            'name' => 'acl-create',
+            'display_name' => 'acl-create',
         ]);
         $role->permissions()->attach($permission);
         $user->roles()->attach($role);
 
-        $userExist = User::factory()->create();
-
-        $response = $this->actingAs($user)->post('/users', [
-            'name' => $userExist->name,
-            'email' => $userExist->email,
-            'password' => '1234567',
+        $userExist = Permission::create([
+            'name' => 'test-create',
+            'display_name' => 'test create',
         ]);
-        $response->assertSessionHasErrors(['email'])->assertStatus(302);
+
+        $exp = explode('-', $userExist->name);
+        $new_exp = $exp;
+        unset($new_exp[count($new_exp) - 1]);
+        $new_exp = implode(' ', $new_exp);
+        $response = $this->actingAs($user)->post('/permissions', [
+            'permission' => $exp[count($exp) - 1],
+            'module' => $new_exp,
+        ]);
+        $response->assertSessionHasErrors(['module'])->assertStatus(302);
     }
 
-    public function test_create_user_is_success(): void
+    public function test_create_permission_is_success(): void
     {
         $user = User::factory()->create();
         $role = Role::create([
@@ -242,21 +250,20 @@ class UserTest extends TestCase
             'display_name' => 'Superadmin',
         ]);
         $permission = Permission::create([
-            'name' => 'users-create',
-            'display_name' => 'users-create',
+            'name' => 'acl-create',
+            'display_name' => 'acl-create',
         ]);
         $role->permissions()->attach($permission);
         $user->roles()->attach($role);
 
-        $response = $this->actingAs($user)->post('/users', [
-            'name' => 'John Doe',
-            'email' => 'xJg9v@example.com',
-            'password' => '1234567',
+        $response = $this->actingAs($user)->post('/permissions', [
+            'permission' => 'read',
+            'module' => 'Test Module',
         ]);
         $response->assertStatus(302);
     }
 
-    public function test_edit_user_page_is_displayed(): void
+    public function test_edit_permission_page_is_displayed(): void
     {
         $user = User::factory()->create();
         $role = Role::create([
@@ -264,19 +271,22 @@ class UserTest extends TestCase
             'display_name' => 'Superadmin',
         ]);
         $permission = Permission::create([
-            'name' => 'users-update',
-            'display_name' => 'users-update',
+            'name' => 'acl-update',
+            'display_name' => 'acl-update',
         ]);
         $role->permissions()->attach($permission);
         $user->roles()->attach($role);
 
-        $userExist = User::factory()->create();
+        $permissionExists = Permission::create([
+            'name' => 'acl-test-update',
+            'display_name' => 'acl-test-update',
+        ]);
 
-        $response = $this->actingAs($user)->get('/users/' . $userExist->id . '/edit');
+        $response = $this->actingAs($user)->get('/permissions/' . $permissionExists->id . '/edit');
         $response->assertOk();
     }
 
-    public function test_update_user_is_forbidden(): void
+    public function test_update_permission_is_forbidden(): void
     {
         $user = User::factory()->create();
         $role = Role::create([
@@ -284,19 +294,22 @@ class UserTest extends TestCase
             'display_name' => 'Superadmin',
         ]);
         $permission = Permission::create([
-            'name' => 'users-wrong-update',
-            'display_name' => 'users-wrong-update',
+            'name' => 'acl-wrong-update',
+            'display_name' => 'acl-wrong-update',
         ]);
         $role->permissions()->attach($permission);
         $user->roles()->attach($role);
 
-        $userExist = User::factory()->create();
+        $permissionExists = Permission::create([
+            'name' => 'acl-test-update',
+            'display_name' => 'acl-test-update',
+        ]);
 
-        $response = $this->actingAs($user)->get('/users/' . $userExist->id . '/edit');
+        $response = $this->actingAs($user)->get('/permissions/' . $permissionExists->id . '/edit');
         $response->assertForbidden();
     }
 
-    public function test_update_user_is_error_validation(): void
+    public function test_update_permission_is_error_validation(): void
     {
         $user = User::factory()->create();
         $role = Role::create([
@@ -304,22 +317,26 @@ class UserTest extends TestCase
             'display_name' => 'Superadmin',
         ]);
         $permission = Permission::create([
-            'name' => 'users-update',
-            'display_name' => 'users-update',
+            'name' => 'acl-update',
+            'display_name' => 'acl-update',
         ]);
         $role->permissions()->attach($permission);
         $user->roles()->attach($role);
 
-        $userExist = User::factory()->create();
-        $userExist2 = User::factory()->create();
-
-        $response = $this->actingAs($user)->patch('/users/' . $userExist2->id, [
-            'name' => '',
-            'email' => $userExist->email,
-            'password' => '',
-            'active' => 1,
+        $permissionExist = Permission::create([
+            'name' => 'acl-test-update',
+            'display_name' => 'acl-test-update',
         ]);
-        $response->assertSessionHasErrors(['name'])->assertStatus(302);
+        $permissionExist2 = Permission::create([
+            'name' => 'acl-test2-update',
+            'display_name' => 'acl-test2-update',
+        ]);
+
+        $response = $this->actingAs($user)->patch('/permissions/' . $permissionExist2->id, [
+            'permission' => 'update',
+            'module' => '',
+        ]);
+        $response->assertSessionHasErrors(['module'])->assertStatus(302);
     }
 
     public function test_update_user_is_exists(): void
@@ -330,24 +347,29 @@ class UserTest extends TestCase
             'display_name' => 'Superadmin',
         ]);
         $permission = Permission::create([
-            'name' => 'users-update',
-            'display_name' => 'users-update',
+            'name' => 'acl-update',
+            'display_name' => 'acl-update',
         ]);
         $role->permissions()->attach($permission);
         $user->roles()->attach($role);
 
-        $userExist = User::factory()->create();
-        $userExist2 = User::factory()->create();
-
-        $response = $this->actingAs($user)->patch('/users/' . $userExist2->id, [
-            'name' => $userExist->name,
-            'email' => $userExist->email,
-            'password' => '1234567',
+        $permissionExist = Permission::create([
+            'name' => 'acl-test-update',
+            'display_name' => 'acl-test-update',
         ]);
-        $response->assertSessionHasErrors(['email'])->assertStatus(302);
+        $permissionExist2 = Permission::create([
+            'name' => 'acl-test2-update',
+            'display_name' => 'acl-test2-update',
+        ]);
+
+        $response = $this->actingAs($user)->patch('/permissions/' . $permissionExist2->id, [
+            'permission' => 'update',
+            'module' => 'acl-test',
+        ]);
+        $response->assertSessionHasErrors(['module'])->assertStatus(302);
     }
 
-    public function test_update_user_is_success(): void
+    public function test_update_permission_is_success(): void
     {
         $user = User::factory()->create();
         $role = Role::create([
@@ -355,23 +377,25 @@ class UserTest extends TestCase
             'display_name' => 'Superadmin',
         ]);
         $permission = Permission::create([
-            'name' => 'users-update',
-            'display_name' => 'users-update',
+            'name' => 'acl-update',
+            'display_name' => 'acl-update',
         ]);
         $role->permissions()->attach($permission);
         $user->roles()->attach($role);
 
-        $userExist2 = User::factory()->create();
+        $permissionExist2 = Permission::create([
+            'name' => 'acl-test2-update',
+            'display_name' => 'acl-test2-update',
+        ]);
 
-        $response = $this->actingAs($user)->patch('/users/' . $userExist2->id, [
-            'name' => $userExist2->name,
-            'email' => $userExist2->email,
-            'password' => '1234567',
+        $response = $this->actingAs($user)->patch('/permissions/' . $permissionExist2->id, [
+            'permission' => 'read',
+            'module' => 'acl-test',
         ]);
         $response->assertStatus(302);
     }
 
-    public function test_view_user_is_displayed(): void
+    public function test_view_permission_is_displayed(): void
     {
         $user = User::factory()->create();
         $role = Role::create([
@@ -379,35 +403,18 @@ class UserTest extends TestCase
             'display_name' => 'Superadmin',
         ]);
         $permission = Permission::create([
-            'name' => 'users-read',
-            'display_name' => 'users-read',
+            'name' => 'acl-read',
+            'display_name' => 'acl-read',
         ]);
         $role->permissions()->attach($permission);
         $user->roles()->attach($role);
 
-        $response = $this->actingAs($user)->get('/users/' . $user->id);
+        $permissionExists = Permission::create([
+            'name' => 'acl-test-create',
+            'display_name' => 'acl-test-create',
+        ]);
+
+        $response = $this->actingAs($user)->get('/permissions/' . $permissionExists->id);
         $response->assertOk();
-    }
-
-    public function test_assign_user_role_permissions_is_success(): void
-    {
-        $user = User::factory()->create();
-        $role = Role::create([
-            'name' => 'superadmin',
-            'display_name' => 'Superadmin',
-        ]);
-        $permission = Permission::create([
-            'name' => 'users-update',
-            'display_name' => 'users-update',
-        ]);
-        $role->permissions()->attach($permission);
-        $user->roles()->attach($role);
-
-        $response = $this->actingAs($user)->patch('/users/' . $user->id . '/assign-acl', [
-            'permission' => $permission->id,
-            'role' => $role->id
-        ]);
-        // dd($response);
-        $response->assertSessionHasErrors(['permission', 'role'])->assertStatus(302)->assertRedirect();
     }
 }

@@ -43,6 +43,15 @@ return [
             ],
         ],
         [
+            'text' => 'Permissions',
+            'route' => 'permissions',
+            'icon' => 'fas fa-fingerprint',
+            'active' => ['permissions', 'permissions/{permission}', 'permissions/create', 'permissions/{permission}/edit',],
+            'permission' => [
+                'acl-menu'
+            ],
+        ],
+        [
             'text' => 'Users',
             'route' => 'users',
             'icon' => 'fas fa-users',
