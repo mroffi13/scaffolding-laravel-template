@@ -52,6 +52,15 @@ return [
             ],
         ],
         [
+            'text' => 'Roles',
+            'route' => 'roles',
+            'icon' => 'fas fa-lock',
+            'active' => ['roles', 'roles/{role}', 'roles/create', 'roles/{role}/edit',],
+            'permission' => [
+                'acl-menu'
+            ],
+        ],
+        [
             'text' => 'Users',
             'route' => 'users',
             'icon' => 'fas fa-users',

@@ -5,14 +5,16 @@ namespace App\Http\Controllers\AccessControl;
 use App\Helpers\General;
 use App\Http\Controllers\Controller;
 use App\Models\AccessControl\Permission;
+use App\Models\AccessControl\Role;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Stringable;
 use Yajra\DataTables\Facades\DataTables;
 
-class PermissionController extends Controller
+class RoleController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -21,7 +23,7 @@ class PermissionController extends Controller
     {
         General::checkPermission('acl-read');
 
-        return view('access-control.permissions.index');
+        return view('access-control.roles.index');
     }
 
     /**
@@ -31,7 +33,9 @@ class PermissionController extends Controller
     {
         General::checkPermission('acl-create');
 
-        return view('access-control.permissions.create-or-edit');
+        $permissions = Permission::orderBy('name', 'asc')->get();
+
+        return view('access-control.roles.create-or-edit', compact('permissions'));
     }
 
     /**
@@ -42,31 +46,28 @@ class PermissionController extends Controller
         General::checkPermission('acl-create');
 
         $request->validate([
-            'permission' => ['required', 'in:create,read,update,delete'],
-            'module' => ['required'],
+            'role_name' => ['required', 'unique:roles,display_name'],
+            'permission' => ['required', 'exists:permissions,id'],
         ]);
 
-        $name = \Str::slug($request->module . ' ' . ucfirst($request->permission));
-        $display_name = ucfirst($request->permission) . ' ' . ucfirst($request->module);
+        $name = \Str::slug($request->role_name);
+        $display_name = ucwords($request->role_name);
         $description = $request->description;
 
-        $check_perm = Permission::where('name', $name)->first();
-        if ($check_perm) {
-            throw ValidationException::withMessages([
-                'module' => 'This permission already exists.',
-            ]);
-        }
-
-        Permission::create([
+        DB::beginTransaction();
+        $role = Role::create([
             'name' => $name,
             'display_name' => $display_name,
             'description' => $description,
         ]);
 
-        return redirect()->route('permissions')->with([
+        $role->syncPermissions($request->permission);
+        DB::commit();
+
+        return redirect()->route('roles')->with([
             'success' => true,
             'toastr' => 'success',
-            'message' => 'Permission created successfully',
+            'message' => 'Role created successfully',
         ]);
     }
 
@@ -77,13 +78,13 @@ class PermissionController extends Controller
     {
         General::checkPermission('acl-read');
 
-        $permission = Permission::find($id);
-        if ($permission == null) {
-            abort(404, 'Permission not found');
+        $role = Role::with('permissions')->find($id);
+        if ($role == null) {
+            abort(404, 'Role not found');
         }
         $userLogin = Auth::user();
 
-        return view('access-control.permissions.view', compact('permission', 'userLogin'));
+        return view('access-control.roles.view', compact('role', 'userLogin'));
     }
 
     /**
@@ -93,12 +94,14 @@ class PermissionController extends Controller
     {
         General::checkPermission('acl-update');
 
-        $permission = Permission::find($id);
-        if ($permission == null) {
-            abort(404, 'Permission not found');
+        $role = Role::with('permissions')->find($id);
+        if ($role == null) {
+            abort(404, 'Role not found');
         }
 
-        return view('access-control.permissions.create-or-edit', compact('permission'));
+        $permissions = Permission::orderBy('name', 'asc')->get();
+
+        return view('access-control.roles.create-or-edit', compact('role', 'permissions'));
     }
 
     /**
@@ -109,35 +112,32 @@ class PermissionController extends Controller
         General::checkPermission('acl-update');
 
         $request->validate([
-            'permission' => ['required', 'in:create,read,update,delete'],
-            'module' => ['required'],
+            'role_name' => ['required', Rule::unique('roles','display_name')->ignore($id)],
+            'permission' => ['required', 'exists:permissions,id'],
         ]);
 
-        $name = \Str::slug($request->module . ' ' . ucfirst($request->permission));
-        $display_name = ucfirst($request->permission) . ' ' . ucfirst($request->module);
+        $name = \Str::slug($request->role_name);
+        $display_name = ucwords($request->role_name);
         $description = $request->description;
 
-        $check_perm = Permission::where('name', $name)->where('id', '!=', $id)->first();
-        if ($check_perm) {
-            throw ValidationException::withMessages([
-                'module' => 'This permission already exists.',
-            ]);
+        DB::beginTransaction();
+        $role = Role::where('id', $id)->first();
+        if($role == null) {
+            abort(404, 'Role not found');
         }
 
-        $permission = Permission::where('id', $id)->first();
-        if($permission == null) {
-            abort(404, 'Permission not found');
-        }
+        $role->name = $name;
+        $role->display_name = $display_name;
+        $role->description = $description;
+        $role->save();
 
-        $permission->name = $name;
-        $permission->display_name = $display_name;
-        $permission->description = $description;
-        $permission->save();
+        $role->syncPermissions($request->permission);
+        DB::commit();
 
-        return redirect()->route('permissions')->with([
+        return redirect()->route('roles')->with([
             'success' => true,
             'toastr' => 'success',
-            'message' => 'Permission updated successfully',
+            'message' => 'Role updated successfully',
         ]);
     }
 
@@ -148,16 +148,16 @@ class PermissionController extends Controller
     {
         General::checkPermission('acl-delete');
 
-        $model = Permission::find($id);
+        $model = Role::find($id);
         if($model == null) {
-            abort(404, 'Permission not found');
+            abort(404, 'Role not found');
         }
 
         $model->delete();
 
         return response()->json([
             'success' => true,
-            'message' => 'Permission deleted successfully',
+            'message' => 'Role deleted successfully',
         ]);
     }
 
@@ -165,11 +165,10 @@ class PermissionController extends Controller
     {
         General::checkPermission('acl-read');
 
-        $model = Permission::query();
+        $model = Role::query();
 
         return DataTables::eloquent($model)
             ->addIndexColumn()
-            ->rawColumns(['active'])
             ->addColumn('created_at', function ($model) {
                 return $model->created_at->format('Y-m-d H:i:s');
             })
@@ -177,7 +176,7 @@ class PermissionController extends Controller
                 return $model->updated_at->format('Y-m-d H:i:s');
             })
             ->addColumn('action', function ($model) {
-                return view('access-control.permissions.partials.action', [
+                return view('access-control.roles.partials.action', [
                     'model' => $model,
                     'user' => Auth::user(),
                 ]);
