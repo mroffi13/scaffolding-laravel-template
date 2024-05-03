@@ -15,15 +15,10 @@ return [
         'superadministrator' => [
             'users' => 'c,r,u,d,m',
             'acl' => 'c,r,u,d,m',
-            'pemagang' => 'c,r,u,d,m',
-            'perusahaan-penerima' => 'c,r,u,d,m',
-            'organisasi-penerima' => 'c,r,u,d,m',
-            'master-status-pemagang' => 'c,r,u,d,m',
             'dashboard' => 'm'
         ],
         'administrator' => [
             'users' => 'c,r,u,d',
-            'pemagang' => 'c,r,u,d',
         ],
     ],
 
