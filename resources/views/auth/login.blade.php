@@ -3,7 +3,7 @@
     <div class="m-3 p-4">
         <img src="{{ asset('img/stisla-fill.svg') }}" alt="logo" width="80"
             class="shadow-light rounded-circle mb-5 mt-2">
-        <h4 class="text-dark font-weight-normal">Welcome to <span class="font-weight-bold">Fuji Academy</span>
+        <h4 class="text-dark font-weight-normal">Welcome to <span class="font-weight-bold">{{config('app.name')}}</span>
         </h4>
         <p class="text-muted">Before you get started, <br>you must login.</p>
         <form method="POST" action="{{ route('login') }}" class="needs-validation" novalidate="">
